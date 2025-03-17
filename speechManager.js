@@ -48,24 +48,47 @@ export class SpeechManager {
       // Cancel any ongoing speech
       this.speechSynthesis.cancel();
       
-      const utterance = new SpeechSynthesisUtterance(text);
+      // Split text into sentences
+      const sentences = this.splitIntoSentences(text);
+      let sentenceIndex = 0;
       
-      if (this.selectedVoice) {
-        utterance.voice = this.selectedVoice;
-      }
-      
-      utterance.rate = 1;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-      
-      utterance.onend = () => resolve();
-      utterance.onerror = (err) => {
-        console.error('Speech synthesis error:', err);
-        reject(err);
+      const speakNextSentence = () => {
+        if (sentenceIndex >= sentences.length) {
+          return resolve();
+        }
+        
+        const sentence = sentences[sentenceIndex];
+        const utterance = new SpeechSynthesisUtterance(sentence);
+        
+        if (this.selectedVoice) {
+          utterance.voice = this.selectedVoice;
+        }
+        
+        utterance.rate = 1;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+        
+        utterance.onend = () => {
+          sentenceIndex++;
+          speakNextSentence();
+        };
+        
+        utterance.onerror = (err) => {
+          console.error('Speech synthesis error:', err);
+          reject(err);
+        };
+        
+        this.speechSynthesis.speak(utterance);
       };
       
-      this.speechSynthesis.speak(utterance);
+      speakNextSentence();
     });
+  }
+  
+  splitIntoSentences(text) {
+    // Split text by sentence endings (., !, ?) followed by a space or end of string
+    // This regex handles common sentence endings while preserving punctuation
+    return text.match(/[^.!?]+[.!?]+(\s|$)/g) || [text];
   }
   
   async startListening() {
@@ -93,4 +116,3 @@ export class SpeechManager {
     }
   }
 }
-
