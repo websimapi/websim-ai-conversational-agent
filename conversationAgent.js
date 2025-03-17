@@ -66,7 +66,7 @@ export class ConversationAgent {
     try {
       // Get AI response
       const completion = await websim.chat.completions.create({ messages });
-      const response = completion.content;
+      const response = completion.content || "I'm not sure how to respond to that.";
       
       // Add to conversation history
       this.addToConversationHistory('assistant', response);
@@ -92,7 +92,7 @@ export class ConversationAgent {
     
     try {
       const completion = await websim.chat.completions.create({ messages });
-      const response = completion.content;
+      const response = completion.content || "Hello there! How are you doing today?";
       
       // Add to conversation history
       this.addToConversationHistory('assistant', response);
@@ -145,4 +145,3 @@ export class ConversationAgent {
     return Date.now() - this.lastMessageTime;
   }
 }
-
