@@ -3,6 +3,27 @@ export class ConversationAgent {
     this.conversationHistory = [];
     this.memoryManager = memoryManager;
     this.lastMessageTime = Date.now();
+    
+    // Load conversation history from local storage
+    this.loadConversationHistory();
+  }
+  
+  loadConversationHistory() {
+    const storedHistory = localStorage.getItem('ai_conversation_history');
+    if (storedHistory) {
+      try {
+        this.conversationHistory = JSON.parse(storedHistory);
+      } catch (e) {
+        console.error('Error loading conversation history from storage', e);
+        this.conversationHistory = [];
+      }
+    }
+  }
+  
+  saveConversationHistory() {
+    // Save only the last 20 messages to prevent storage issues
+    const historyToSave = this.conversationHistory.slice(-20);
+    localStorage.setItem('ai_conversation_history', JSON.stringify(historyToSave));
   }
   
   async processUserInput(userInput) {
@@ -139,6 +160,9 @@ export class ConversationAgent {
     if (this.conversationHistory.length > 20) {
       this.conversationHistory = this.conversationHistory.slice(-20);
     }
+    
+    // Save to localStorage
+    this.saveConversationHistory();
   }
   
   getTimeSinceLastMessage() {

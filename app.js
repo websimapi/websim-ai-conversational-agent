@@ -17,6 +17,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('mic-button')
   );
 
+  // Restore conversation UI from history
+  if (conversationAgent.conversationHistory.length > 0) {
+    // Display previous conversation in UI
+    conversationAgent.conversationHistory.forEach(msg => {
+      if (msg.role === 'user') {
+        uiManager.addUserMessage(msg.content);
+      } else if (msg.role === 'assistant') {
+        uiManager.addAIMessage(msg.content);
+      }
+    });
+  }
+
   // Set up event handlers
   uiManager.onSendMessage(async (message) => {
     if (!message.trim()) return;
@@ -78,18 +90,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
-  // Start with an initial greeting
-  uiManager.showThinking();
-  try {
-    const initialGreeting = await conversationAgent.initiateConversation('greeting');
-    uiManager.hideThinking();
-    uiManager.addAIMessage(initialGreeting);
-    await speechManager.speak(initialGreeting).catch(err => {
-      console.error('Initial greeting speech error:', err);
-    });
-  } catch (error) {
-    console.error('Error with initial greeting:', error);
-    uiManager.hideThinking();
-    uiManager.addAIMessage("Hello! How can I help you today?");
+  // Start with an initial greeting only if there's no conversation history
+  if (conversationAgent.conversationHistory.length === 0) {
+    uiManager.showThinking();
+    try {
+      const initialGreeting = await conversationAgent.initiateConversation('greeting');
+      uiManager.hideThinking();
+      uiManager.addAIMessage(initialGreeting);
+      await speechManager.speak(initialGreeting).catch(err => {
+        console.error('Initial greeting speech error:', err);
+      });
+    } catch (error) {
+      console.error('Error with initial greeting:', error);
+      uiManager.hideThinking();
+      uiManager.addAIMessage("Hello! How can I help you today?");
+    }
   }
 });
