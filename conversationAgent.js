@@ -153,6 +153,12 @@ export class ConversationAgent {
     return '';
   }
   
+  clearConversationHistory() {
+    this.conversationHistory = [];
+    localStorage.removeItem('ai_conversation_history');
+    this.lastMessageTime = Date.now();
+  }
+  
   addToConversationHistory(role, content) {
     this.conversationHistory.push({ role, content });
     

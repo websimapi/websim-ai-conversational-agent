@@ -63,6 +63,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
   
+  // Set up memory clearing function
+  uiManager.onClearMemory(() => {
+    memoryManager.clearMemories();
+    conversationAgent.clearConversationHistory();
+  });
+
   // Set up voice input
   uiManager.onMicButtonClick(async () => {
     try {

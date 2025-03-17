@@ -9,6 +9,19 @@ export class UIManager {
     this.statusElement.className = 'status-indicator';
     this.conversationContainer.after(this.statusElement);
     
+    // Add clear memory button
+    this.clearButton = document.createElement('button');
+    this.clearButton.id = 'clear-button';
+    this.clearButton.className = 'clear-button';
+    this.clearButton.title = 'Clear conversation history';
+    this.clearButton.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"></polyline>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+      </svg>
+    `;
+    document.body.appendChild(this.clearButton);
+    
     this.initEventListeners();
   }
   
@@ -22,6 +35,10 @@ export class UIManager {
     this.sendButton.addEventListener('click', () => {
       this.handleSendMessage();
     });
+    
+    this.clearButton.addEventListener('click', () => {
+      this.handleClearMemory();
+    });
   }
   
   onSendMessage(callback) {
@@ -32,11 +49,25 @@ export class UIManager {
     this.micButton.addEventListener('click', callback);
   }
   
+  onClearMemory(callback) {
+    this.clearMemoryCallback = callback;
+  }
+  
   handleSendMessage() {
     const message = this.userInput.value.trim();
     if (message && this.sendMessageCallback) {
       this.sendMessageCallback(message);
       this.userInput.value = '';
+    }
+  }
+  
+  handleClearMemory() {
+    if (confirm('Are you sure you want to clear all conversation history and memories? This cannot be undone.')) {
+      if (this.clearMemoryCallback) {
+        this.clearMemoryCallback();
+        this.conversationContainer.innerHTML = ''; // Clear the UI
+        this.addAIMessage("Hello! I've cleared my memory. How can I help you today?");
+      }
     }
   }
   
@@ -95,4 +126,3 @@ export class UIManager {
     this.conversationContainer.scrollTop = this.conversationContainer.scrollHeight;
   }
 }
-
