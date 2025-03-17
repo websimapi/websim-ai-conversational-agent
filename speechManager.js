@@ -75,13 +75,25 @@ export class SpeechManager {
         
         utterance.onerror = (err) => {
           console.error('Speech synthesis error:', err);
-          reject(err);
+          sentenceIndex++;
+          speakNextSentence(); // Continue with next sentence instead of rejecting
         };
         
-        this.speechSynthesis.speak(utterance);
+        try {
+          this.speechSynthesis.speak(utterance);
+        } catch (err) {
+          console.error('Speech synthesis speak error:', err);
+          sentenceIndex++;
+          speakNextSentence(); // Continue with next sentence
+        }
       };
       
-      speakNextSentence();
+      try {
+        speakNextSentence();
+      } catch (err) {
+        console.error('Overall speech error:', err);
+        resolve(); // Resolve instead of letting the promise fail
+      }
     });
   }
   

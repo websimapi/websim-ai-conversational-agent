@@ -27,20 +27,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Show thinking indicator
     uiManager.showThinking();
     
-    // Get AI response
-    const response = await conversationAgent.processUserInput(message);
-    
-    // Hide thinking indicator
-    uiManager.hideThinking();
-    
-    // Display and speak AI response
-    uiManager.addAIMessage(response);
-    await speechManager.speak(response);
-    
-    // Check if we should start a new topic after a pause
-    setTimeout(() => {
-      checkForNewConversationTopic();
-    }, 10000); // 10 second pause
+    try {
+      // Get AI response
+      const response = await conversationAgent.processUserInput(message);
+      
+      // Hide thinking indicator
+      uiManager.hideThinking();
+      
+      // Display and speak AI response
+      uiManager.addAIMessage(response);
+      await speechManager.speak(response).catch(err => {
+        console.error('Speech error caught:', err);
+      });
+      
+      // Check if we should start a new topic after a pause
+      setTimeout(() => {
+        checkForNewConversationTopic();
+      }, 10000); // 10 second pause
+    } catch (error) {
+      console.error('Error processing message:', error);
+      uiManager.hideThinking();
+      uiManager.addAIMessage("I'm sorry, I encountered an error processing your message.");
+    }
   });
   
   // Set up voice input
@@ -72,9 +80,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Start with an initial greeting
   uiManager.showThinking();
-  const initialGreeting = await conversationAgent.initiateConversation('greeting');
-  uiManager.hideThinking();
-  uiManager.addAIMessage(initialGreeting);
-  await speechManager.speak(initialGreeting);
+  try {
+    const initialGreeting = await conversationAgent.initiateConversation('greeting');
+    uiManager.hideThinking();
+    uiManager.addAIMessage(initialGreeting);
+    await speechManager.speak(initialGreeting).catch(err => {
+      console.error('Initial greeting speech error:', err);
+    });
+  } catch (error) {
+    console.error('Error with initial greeting:', error);
+    uiManager.hideThinking();
+    uiManager.addAIMessage("Hello! How can I help you today?");
+  }
 });
-
